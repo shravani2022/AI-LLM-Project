@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Animation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            overflow: hidden;
+            background-color: #000;
+            font-family: Arial, sans-serif;
+        }
+        
+        #space {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(ellipse at center, #0a0e23 0%, #090a0f 50%, #050505 100%);
+            overflow: hidden;
+        }
+        
+        .star {
+            position: absolute;
+            background-color: #fff;
+            border-radius: 50%;
+            animation: twinkle 4s infinite alternate;
+        }
+        
+        .shooting-star {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background-color: #fff;
+            border-radius: 50%;
+            animation: shoot 2s linear forwards;
+            opacity: 0;
+        }
+        
+        .shooting-star:after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 20px;
+            height: 1px;
+            background: linear-gradient(to left, rgba(255, 255, 255, 0.7), transparent);
+            transform: translateX(-100%);
+        }
+        
+        .planet {
+            position: absolute;
+            border-radius: 50%;
+            box-shadow: inset -10px -10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        .saturn {
+            position: absolute;
+            border-radius: 50%;
+            box-shadow: inset -10px -10px 30px rgba(0, 0, 0, 0.5);
+            overflow: visible;
+        }
+        
+        .saturn-ring {
+            position: absolute;
+            background: transparent;
+            border: 2px solid rgba(210, 180, 140, 0.8);
+            border-radius: 50%;
+            transform: rotateX(75deg);
+        }
+        
+        .moon {
+            position: absolute;
+            border-radius: 50%;
+            background-color: #d0d0d0;
+            box-shadow: inset -3px -3px 10px rgba(0, 0, 0, 0.5);
+        }
+        
+        .comet {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background-color: #f0f0f0;
+            border-radius: 50%;
+            animation: cometMove 20s linear infinite;
+        }
+        
+        .comet:after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 40px;
+            height: 3px;
+            background: linear-gradient(to left, rgba(255, 255, 255, 0.8), transparent);
+            transform: translateX(-100%);
+        }
+        
+        .nebula {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(ellipse at center, 
+                rgba(100, 0, 255, 0.3) 0%, 
+                rgba(200, 50, 255, 0.2) 40%, 
+                rgba(100, 0, 150, 0.1) 70%, 
+                rgba(50, 0, 100, 0) 100%);
+            filter: blur(5px);
+            animation: pulse 8s infinite alternate;
+        }
+        
+        .galaxy {
+            position: absolute;
+            background: radial-gradient(ellipse at center, 
+                rgba(255, 255, 255, 0.5) 0%, 
+                rgba(200, 200, 255, 0.2) 40%, 
+                rgba(50, 50, 255, 0.1) 60%, 
+                rgba(20, 20, 50, 0) 100%);
+            border-radius: 50%;
+            filter: blur(1px);
+            transform: rotate(45deg) scale(1);
+            animation: rotate 100s linear infinite;
+        }
+        
+        .sun {
+            position: absolute;
+            background: radial-gradient(circle at center, 
+                rgba(255, 255, 200, 1) 0%, 
+                rgba(255, 200, 50, 0.8) 20%, 
+                rgba(255, 150, 0, 0.5) 70%, 
+                rgba(255, 100, 0, 0) 100%);
+            border-radius: 50%;
+            box-shadow: 0 0 40px rgba(255, 200, 50, 0.8);
+            animation: pulse 4s infinite alternate;
+        }
+        
+        .sun-flare {
+            position: absolute;
+            background-color: rgba(255, 200, 50, 0.5);
+            border-radius: 50%;
+            filter: blur(5px);
+            animation: flare 8s infinite alternate;
+        }
+        
+        .wormhole {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(ellipse at center, 
+                rgba(0, 0, 0, 1) 0%, 
+                rgba(40, 0, 80, 0.8) 30%, 
+                rgba(80, 0, 160, 0.5) 60%, 
+                rgba(20, 20, 50, 0) 100%);
+            box-shadow: 0 0 20px rgba(100, 0, 200, 0.5);
+            animation: wormholePulse 5s infinite alternate;
+        }
+        
+        .asteroid {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            background-color: #a08060;
+            border-radius: 50%;
+            animation: rotate 30s linear infinite;
+        }
+        
+        .asteroid-belt {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .control-panel {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+            background-color: rgba(20, 20, 40, 0.7);
+            padding: 10px;
+            border-radius: 10px;
+        }
+        
+        button {
+            padding: 8px 12px;
+            background-color: rgba(100, 100, 200, 0.5);
+            color: white;
+            border: 1px solid rgba(150, 150, 255, 0.5);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        button:hover {
+            background-color: rgba(150, 150, 255, 0.7);
+        }
+        
+        .info-panel {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: rgba(20, 20, 40, 0.7);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            max-width: 300px;
+            font-size: 14px;
+            z-index: 100;
+        }
+        
+        .title {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-size: 28px;
+            text-shadow: 0 0 10px rgba(100, 100, 255, 0.8);
+            z-index: 100;
+        }
+        
+        @keyframes twinkle {
+            0%, 100% {
+                opacity: 0.5;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+        }
+        
+        @keyframes shoot {
+            0% {
+                transform: translateX(0) translateY(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translateX(-500px) translateY(500px);
+                opacity: 0;
+            }
+        }
+        
+        @keyframes cometMove {
+            0% {
+                transform: translateX(100vw) translateY(-10vh) rotate(45deg);
+            }
+            100% {
+                transform: translateX(-100px) translateY(100vh) rotate(45deg);
+            }
+        }
+        
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
+        @keyframes orbit {
+            from {
+                transform: rotate(0deg) translateX(var(--orbit-distance)) rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg) translateX(var(--orbit-distance)) rotate(-360deg);
+            }
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.05);
+                opacity: 0.8;
+            }
+        }
+        
+        @keyframes flare {
+            0% {
+                opacity: 0.1;
+                transform: scale(1) rotate(0deg);
+            }
+            50% {
+                opacity: 0.4;
+                transform: scale(1.5) rotate(180deg);
+            }
+            100% {
+                opacity: 0.1;
+                transform: scale(1) rotate(360deg);
+            }
+        }
+        
+        @keyframes wormholePulse {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 20px rgba(100, 0, 200, 0.5);
+            }
+            50% {
+                transform: scale(1.1);
+                box-shadow: 0 0 30px rgba(150, 0, 255, 0.7);
+            }
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 20px rgba(100, 0, 200, 0.5);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="space">
+        <div class="title">Cosmic Space Explorer</div>
+        
+        <div class="info-panel">
+            <h3>Space Objects</h3>
+            <p>Explore the vastness of space with stars, planets, nebulas, and more. Use the controls below to interact with the cosmic environment.</p>
+        </div>
+        
+        <div class="control-panel">
+            <button id="addStars">Add Stars</button>
+            <button id="shootingStar">Shooting Star</button>
+            <button id="toggleOrbit">Toggle Orbits</button>
+            <button id="addComet">Add Comet</button>
+            <button id="reset">Reset</button>
+        </div>
+    </div>
+    
+    <script>
+        // Cache DOM elements
+        const spaceEl = document.getElementById('space');
+        const addStarsBtn = document.getElementById('addStars');
+        const shootingStarBtn = document.getElementById('shootingStar');
+        const toggleOrbitBtn = document.getElementById('toggleOrbit');
+        const addCometBtn = document.getElementById('addComet');
+        const resetBtn = document.getElementById('reset');
+        
+        // Configuration
+        const config = {
+            maxStars: 200,
+            orbiting: true
+        };
+        
+        // State tracking
+        let planets = [];
+        let stars = [];
+        let orbiting = true;
+        
+        // Initialize the space scene
+        function initSpace() {
+            createStars(100);
+            createNebula();
+            createGalaxy();
+            createSun();
+            createPlanets();
+            createWormhole();
+            createAsteroidBelt();
+        }
+        
+        // Create stars
+        function createStars(count) {
+            for (let i = 0; i < count; i++) {
+                if (stars.length >= config.maxStars) return;
+                
+                const star = document.createElement('div');
+                star.className = 'star';
+                
+                // Random size
+                const size = Math.random() * 2 + 1;
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                
+                // Random position
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+                
+                // Random twinkle speed
+                star.style.animationDuration = `${Math.random() * 3 + 2}s`;
+                star.style.animationDelay = `${Math.random() * 2}s`;
+                
+                spaceEl.appendChild(star);
+                stars.push(star);
+            }
+        }
+        
+        // Create a shooting star
+        function createShootingStar() {
+            const star = document.createElement('div');
+            star.className = 'shooting-star';
+            
+            // Random position at top right area
+            const startX = Math.random() * 50 + 50;
+            const startY = Math.random() * 20;
+            
+            star.style.left = `${startX}%`;
+            star.style.top = `${startY}%`;
+            
+            // Random angle
+            const angle = Math.random() * 30 + 30;
+            star.style.transform = `rotate(${angle}deg)`;
+            
+            // Random speed
+            const duration = Math.random() * 2 + 1;
+            star.style.animationDuration = `${duration}s`;
+            
+            spaceEl.appendChild(star);
+            
+            // Remove after animation
+            setTimeout(() => {
+                spaceEl.removeChild(star);
+            }, duration * 1000);
+        }
+        
+        // Create nebula
+        function createNebula() {
+            const nebula = document.createElement('div');
+            nebula.className = 'nebula';
+            
+            const size = Math.random() * 300 + 200;
+            nebula.style.width = `${size}px`;
+            nebula.style.height = `${size}px`;
+            
+            nebula.style.left = `${Math.random() * 30 + 10}%`;
+            nebula.style.top = `${Math.random() * 30 + 10}%`;
+            
+            // Random color
+            const hue = Math.random() * 60 + 240; // Blue to purple
+            nebula.style.background = `radial-gradient(
+                ellipse at center, 
+                hsla(${hue}, 100%, 50%, 0.3) 0%, 
+                hsla(${hue + 30}, 100%, 60%, 0.2) 40%, 
+                hsla(${hue - 20}, 100%, 30%, 0.1) 70%, 
+                hsla(${hue}, 100%, 20%, 0) 100%
+            )`;
+            
+            spaceEl.appendChild(nebula);
+        }
+        
+        // Create galaxy
+        function createGalaxy() {
+            const galaxy = document.createElement('div');
+            galaxy.className = 'galaxy';
+            
+            const size = Math.random() * 200 + 150;
+            galaxy.style.width = `${size}px`;
+            galaxy.style.height = `${size}px`;
+            
+            galaxy.style.left = `${Math.random() * 20 + 70}%`;
+            galaxy.style.top = `${Math.random() * 20 + 70}%`;
+            
+            spaceEl.appendChild(galaxy);
+        }
+        
+        // Create sun
+        function createSun() {
+            const sun = document.createElement('div');
+            sun.className = 'sun';
+            sun.id = 'sun';
+            
+            const size = 80;
+            sun.style.width = `${size}px`;
+            sun.style.height = `${size}px`;
+            
+            // Center position
+            sun.style.left = '50%';
+            sun.style.top = '50%';
+            sun.style.transform = 'translate(-50%, -50%)';
+            
+            spaceEl.appendChild(sun);
+            
+            // Add sun flares
+            for (let i = 0; i < 3; i++) {
+                const flare = document.createElement('div');
+                flare.className = 'sun-flare';
+                
+                const flareSize = Math.random() * 30 + 20;
+                flare.style.width = `${flareSize}px`;
+                flare.style.height = `${flareSize}px`;
+                
+                const angle = Math.random() * 360;
+                const distance = size / 2 - 10;
+                
+                flare.style.left = `calc(50% + ${Math.cos(angle * Math.PI / 180) * distance}px)`;
+                flare.style.top = `calc(50% + ${Math.sin(angle * Math.PI / 180) * distance}px)`;
+                
+                flare.style.animationDuration = `${Math.random() * 4 + 4}s`;
+                flare.style.animationDelay = `${Math.random() * 2}s`;
+                
+                sun.appendChild(flare);
+            }
+        }
+        
+        // Create planets
+        function createPlanets() {
+            const planetColors = [
+                '#3498db', // Blue
+                '#e74c3c', // Red
+                '#2ecc71', // Green
+                '#f39c12', // Orange
+                '#9b59b6', // Purple
+                '#1abc9c', // Teal
+                '#d35400'  // Brown
+            ];
+            
+            // Create several planets with different sizes and colors
+            for (let i = 0; i < 4; i++) {
+                const planetContainer = document.createElement('div');
+                planetContainer.className = 'planet-container';
+                planetContainer.style.position = 'absolute';
+                planetContainer.style.left = '50%';
+                planetContainer.style.top = '50%';
+                planetContainer.style.width = '0';
+                planetContainer.style.height = '0';
+                
+                const planet = document.createElement('div');
+                
+                // Special case for Saturn
+                if (i === 2) {
+                    planet.className = 'saturn';
+                    
+                    // Create rings
+                    const ring = document.createElement('div');
+                    ring.className = 'saturn-ring';
+                    
+                    const ringWidth = 60;
+                    ring.style.width = `${ringWidth}px`;
+                    ring.style.height = `${ringWidth}px`;
+                    
+                    ring.style.left = `-${ringWidth/2 - 15}px`;
+                    ring.style.top = `-${ringWidth/2 - 15}px`;
+                    
+                    planet.appendChild(ring);
+                } else {
+                    planet.className = 'planet';
+                }
+                
+                // Set planet properties
+                const size = Math.random() * 15 + 15;
+                planet.style.width = `${size}px`;
+                planet.style.height = `${size}px`;
+                
+                planet.style.backgroundColor = planetColors[i];
+                planet.style.left = `-${size/2}px`;
+                planet.style.top = `-${size/2}px`;
+                
+                // Set orbit
+                const orbitDistance = 100 + i * 60;
+                const orbitSpeed = 20 + i * 10;
+                
+                planetContainer.style.setProperty('--orbit-distance', `${orbitDistance}px`);
+                planetContainer.style.animation = `orbit ${orbitSpeed}s linear infinite`;
+                
+                // Add moon for some planets
+                if (i === 1 || i === 3) {
+                    const moon = document.createElement('div');
+                    moon.className = 'moon';
+                    
+                    const moonSize = size * 0.3;
+                    moon.style.width = `${moonSize}px`;
+                    moon.style.height = `${moonSize}px`;
+                    
+                    const moonDistance = size + 10;
+                    moon.style.left = `${moonDistance}px`;
+                    moon.style.top = `-${moonSize/2}px`;
+                    
+                    planet.appendChild(moon);
+                }
+                
+                planetContainer.appendChild(planet);
+                spaceEl.appendChild(planetContainer);
+                planets.push(planetContainer);
+            }
+        }
+        
+        // Create wormhole
+        function createWormhole() {
+            const wormhole = document.createElement('div');
+            wormhole.className = 'wormhole';
+            
+            const size = 30;
+            wormhole.style.width = `${size}px`;
+            wormhole.style.height = `${size}px`;
+            
+            wormhole.style.left = `${Math.random() * 20 + 75}%`;
+            wormhole.style.top = `${Math.random() * 20 + 15}%`;
+            
+            spaceEl.appendChild(wormhole);
+        }
+        
+        // Create asteroid belt
+        function createAsteroidBelt() {
+            const belt = document.createElement('div');
+            belt.className = 'asteroid-belt';
+            
+            const totalAsteroids = 100;
+            
+            for (let i = 0; i < totalAsteroids; i++) {
+                const asteroid = document.createElement('div');
+                asteroid.className = 'asteroid';
+                
+                // Random size
+                const size = Math.random() * 3 + 1;
+                asteroid.style.width = `${size}px`;
+                asteroid.style.height = `${size}px`;
+                
+                // Position in belt
+                const angle = Math.random() * 360;
+                const distance = 200 + Math.random() * 30;
+                
+                asteroid.style.left = `${Math.cos(angle * Math.PI / 180) * distance + 250}px`;
+                asteroid.style.top = `${Math.sin(angle * Math.PI / 180) * distance + 250}px`;
+                
+                belt.appendChild(asteroid);
+            }
+            
+            spaceEl.appendChild(belt);
+        }
+        
+        // Create comet
+        function createComet() {
+            const comet = document.createElement('div');
+            comet.className = 'comet';
+            
+            // Random starting position
+            comet.style.left = `${Math.random() * 30 + 60}%`;
+            comet.style.top = '0';
+            
+            // Random angle
+            const angle = Math.random() * 20 + 30;
+            comet.style.transform = `rotate(${angle}deg)`;
+            
+            // Random speed
+            const duration = Math.random() * 10 + 10;
+            comet.style.animationDuration = `${duration}s`;
+            
+            spaceEl.appendChild(comet);
+            
+            // Remove after animation
+            setTimeout(() => {
+                spaceEl.removeChild(comet);
+            }, duration * 1000);
+        }
+        
+        // Toggle planet orbits
+        function toggleOrbits() {
+            orbiting = !orbiting;
+            
+            planets.forEach(planet => {
+                if (orbiting) {
+                    planet.style.animationPlayState = 'running';
+                } else {
+                    planet.style.animationPlayState = 'paused';
+                }
+            });
+        }
+        
+        // Reset the space scene
+        function resetSpace() {
+            spaceEl.innerHTML = '';
+            stars = [];
+            planets = [];
+            
+            // Recreate the UI elements
+            const title = document.createElement('div');
+            title.className = 'title';
+            title.textContent = 'Cosmic Space Explorer';
+            spaceEl.appendChild(title);
+            
+            const infoPanel = document.createElement('div');
+            infoPanel.className = 'info-panel';
+            infoPanel.innerHTML = `
+                <h3>Space Objects</h3>
+                <p>Explore the vastness of space with stars, planets, nebulas, and more. Use the controls below to interact with the cosmic environment.</p>
+            `;
+            spaceEl.appendChild(infoPanel);
+            
+            const controlPanel = document.createElement('div');
+            controlPanel.className = 'control-panel';
+            controlPanel.innerHTML = `
+                <button id="addStars">Add Stars</button>
+                <button id="shootingStar">Shooting Star</button>
+                <button id="toggleOrbit">Toggle Orbits</button>
+                <button id="addComet">Add Comet</button>
+                <button id="reset">Reset</button>
+            `;
+            spaceEl.appendChild(controlPanel);
+            
+            // Reattach event listeners
+            document.getElementById('addStars').addEventListener('click', () => createStars(20));
+            document.getElementById('shootingStar').addEventListener('click', createShootingStar);
+            document.getElementById('toggleOrbit').addEventListener('click', toggleOrbits);
+            document.getElementById('addComet').addEventListener('click', createComet);
+            document.getElementById('reset').addEventListener('click', resetSpace);
+            
+            // Initialize the space again
+            initSpace();
+        }
+        
+        // Event listeners
+        addStarsBtn.addEventListener('click', () => createStars(20));
+        shootingStarBtn.addEventListener('click', createShootingStar);
+        toggleOrbitBtn.addEventListener('click', toggleOrbits);
+        addCometBtn.addEventListener('click', createComet);
+        resetBtn.addEventListener('click', resetSpace);
+        
+        // Make the sun interactive
+        document.addEventListener('click', (e) => {
+            const sun = document.getElementById('sun');
+            if (sun && e.target === sun) {
+                // Create pulse wave
+                const pulse = document.createElement('div');
+                pulse.className = 'sun';
+                pulse.style.width = '80px';
+                pulse.style.height = '80px';
+                pulse.style.left = '50%';
+                pulse.style.top = '50%';
+                pulse.style.transform = 'translate(-50%, -50%)';
+                pulse.style.opacity = '0.5';
+                pulse.style.animation = 'pulse 2s ease-out forwards';
+                
+                spaceEl.appendChild(pulse);
+                
+                // Remove after animation
+                setTimeout(() => {
+                    spaceEl.removeChild(pulse);
+                }, 2000);
+                
+                // Trigger shooting stars
+                for (let i = 0; i < 3; i++) {
+                    setTimeout(() => {
+                        createShootingStar();
+                    }, i * 300);
+                }
+            }
+        });
+        
+        // Initialize the space
+        initSpace();
+        
+        // Create occasional shooting stars
+        setInterval(() => {
+            if (Math.random() > 0.7) {
+                createShootingStar();
+            }
+        }, 5000);
+    </script>
+</body>
+</html>

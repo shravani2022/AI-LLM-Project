@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive DNA Helix Animation</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      overflow: hidden;
+      color: white;
+    }
+    
+    .container {
+      position: relative;
+      width: 100%;
+      max-width: 800px;
+      height: 600px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .controls {
+      width: 100%;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 20px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 15px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+    }
+    
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .control-group label {
+      margin-bottom: 5px;
+      font-weight: 500;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    }
+    
+    .dna-container {
+      position: relative;
+      width: 100%;
+      height: 500px;
+      perspective: 1200px;
+      margin-bottom: 20px;
+    }
+    
+    .dna {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transform-style: preserve-3d;
+      animation: rotate 20s infinite linear;
+    }
+    
+    @keyframes rotate {
+      0% { transform: rotateY(0deg); }
+      100% { transform: rotateY(360deg); }
+    }
+    
+    .base-pair {
+      position: absolute;
+      left: 50%;
+      width: 240px;
+      height: 25px;
+      margin-left: -120px;
+      transform-style: preserve-3d;
+    }
+    
+    .backbone {
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: linear-gradient(45deg, #333, #666);
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+    }
+    
+    .backbone.left {
+      left: 0;
+    }
+    
+    .backbone.right {
+      right: 0;
+    }
+    
+    .base {
+      position: absolute;
+      height: 12px;
+      border-radius: 8px;
+      top: 8px;
+      box-shadow: 0 0 20px currentColor;
+      transition: all 0.3s ease;
+      filter: saturate(1.5) brightness(1.2);
+    }
+    
+    .base.left {
+      left: 30px;
+      width: 90px;
+    }
+    
+    .base.right {
+      right: 30px;
+      width: 90px;
+    }
+    
+    .base.adenine { 
+      background: linear-gradient(to right, #FF5733, #FF8C33);
+      color: rgba(255, 87, 51, 0.5);
+    }
+    
+    .base.thymine { 
+      background: linear-gradient(to right, #33FF57, #33FF99);
+      color: rgba(51, 255, 87, 0.5);
+    }
+    
+    .base.guanine { 
+      background: linear-gradient(to right, #3357FF, #33B5FF);
+      color: rgba(51, 87, 255, 0.5);
+    }
+    
+    .base.cytosine { 
+      background: linear-gradient(to right, #F3FF33, #FFEE33);
+      color: rgba(243, 255, 51, 0.5);
+    }
+    
+    .legend {
+      display: flex;
+      justify-content: center;
+      margin-top: 10px;
+      gap: 15px;
+      flex-wrap: wrap;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 15px;
+      padding: 10px 20px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+    
+    .legend-item {
+      display: flex;
+      align-items: center;
+    }
+    
+    .legend-color {
+      width: 20px;
+      height: 20px;
+      border-radius: 5px;
+      margin-right: 8px;
+      box-shadow: 0 0 10px currentColor;
+    }
+    
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 150px;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+      outline: none;
+    }
+    
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      background: white;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    }
+    
+    button {
+      padding: 10px 18px;
+      border: none;
+      border-radius: 8px;
+      background: linear-gradient(45deg, #5e35b1, #3949ab);
+      color: white;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+      background: linear-gradient(45deg, #673ab7, #3f51b5);
+    }
+    
+    h1 {
+      font-size: 2.5rem;
+      margin: 0 0 20px 0;
+      text-align: center;
+      background: linear-gradient(to right, #ff8a00, #da1b60);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: 800;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      letter-spacing: 1px;
+    }
+    
+    .label {
+      position: absolute;
+      background-color: rgba(255,255,255,0.9);
+      padding: 5px 8px;
+      border-radius: 4px;
+      color: #333;
+      font-weight: bold;
+      pointer-events: none;
+      font-size: 12px;
+      transition: opacity 0.3s;
+      z-index: 2;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    
+    .base-connector {
+      box-shadow: 0 0 5px rgba(255,255,255,0.8);
+    }
+    
+    .particles {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      opacity: 0.6;
+    }
+  </style>
+</head>
+<body>
+  <div id="particles-js" class="particles"></div>
+  <div class="container">
+    <h1>DNA Helix Animation</h1>
+    
+    <div class="controls">
+      <div class="control-group">
+        <label for="rotation-speed">Rotation Speed</label>
+        <input type="range" id="rotation-speed" min="5" max="40" value="20">
+      </div>
+      
+      <div class="control-group">
+        <label for="pairs-count">Base Pairs</label>
+        <input type="range" id="pairs-count" min="10" max="40" value="25">
+      </div>
+      
+      <button id="toggle-animation">Pause</button>
+      <button id="highlight-pairs">Highlight Pairs</button>
+    </div>
+    
+    <div class="dna-container">
+      <div class="dna" id="dna-model"></div>
+    </div>
+    
+    <div class="legend">
+      <div class="legend-item">
+        <div class="legend-color" style="background: linear-gradient(to right, #FF5733, #FF8C33); color: rgba(255, 87, 51, 0.5);"></div>
+        <span>Adenine (A)</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background: linear-gradient(to right, #33FF57, #33FF99); color: rgba(51, 255, 87, 0.5);"></div>
+        <span>Thymine (T)</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background: linear-gradient(to right, #3357FF, #33B5FF); color: rgba(51, 87, 255, 0.5);"></div>
+        <span>Guanine (G)</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background: linear-gradient(to right, #F3FF33, #FFEE33); color: rgba(243, 255, 51, 0.5);"></div>
+        <span>Cytosine (C)</span>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
+  <script>
+    // Initialize particles
+    particlesJS('particles-js', {
+      "particles": {
+        "number": {
+          "value": 80,
+          "density": {
+            "enable": true,
+            "value_area": 800
+          }
+        },
+        "color": {
+          "value": "#ffffff"
+        },
+        "shape": {
+          "type": "circle",
+          "stroke": {
+            "width": 0,
+            "color": "#000000"
+          }
+        },
+        "opacity": {
+          "value": 0.5,
+          "random": true
+        },
+        "size": {
+          "value": 3,
+          "random": true
+        },
+        "line_linked": {
+          "enable": true,
+          "distance": 150,
+          "color": "#ffffff",
+          "opacity": 0.4,
+          "width": 1
+        },
+        "move": {
+          "enable": true,
+          "speed": 1,
+          "direction": "none",
+          "random": true,
+          "straight": false,
+          "out_mode": "out",
+          "bounce": false
+        }
+      },
+      "interactivity": {
+        "detect_on": "canvas",
+        "events": {
+          "onhover": {
+            "enable": true,
+            "mode": "grab"
+          },
+          "onclick": {
+            "enable": true,
+            "mode": "push"
+          },
+          "resize": true
+        }
+      },
+      "retina_detect": true
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const dnaElement = document.getElementById('dna-model');
+      const rotationSpeedInput = document.getElementById('rotation-speed');
+      const pairsCountInput = document.getElementById('pairs-count');
+      const toggleButton = document.getElementById('toggle-animation');
+      const highlightButton = document.getElementById('highlight-pairs');
+      
+      let animationPaused = false;
+      let highlightPairs = false;
+      let basePairs = 25;
+      
+      // Base pairs combinations (A-T, G-C)
+      const basePairTypes = [
+        { left: 'adenine', right: 'thymine' },
+        { left: 'thymine', right: 'adenine' },
+        { left: 'guanine', right: 'cytosine' },
+        { left: 'cytosine', right: 'guanine' }
+      ];
+      
+      function generateDNA(pairsCount) {
+        dnaElement.innerHTML = '';
+        
+        for (let i = 0; i < pairsCount; i++) {
+          const basePairType = basePairTypes[Math.floor(Math.random() * basePairTypes.length)];
+          
+          const basePair = document.createElement('div');
+          basePair.className = 'base-pair';
+          basePair.style.top = ${(i * 500 / pairsCount) + 10}px;
+          basePair.style.transform = rotateY(${i * (360 / pairsCount)}deg);
+          
+          // Left backbone
+          const leftBackbone = document.createElement('div');
+          leftBackbone.className = 'backbone left';
+          
+          // Right backbone
+          const rightBackbone = document.createElement('div');
+          rightBackbone.className = 'backbone right';
+          
+          // Left base
+          const leftBase = document.createElement('div');
+          leftBase.className = base left ${basePairType.left};
+          leftBase.setAttribute('data-base', basePairType.left.charAt(0).toUpperCase());
+          
+          // Right base
+          const rightBase = document.createElement('div');
+          rightBase.className = base right ${basePairType.right};
+          rightBase.setAttribute('data-base', basePairType.right.charAt(0).toUpperCase());
+          
+          basePair.appendChild(leftBackbone);
+          basePair.appendChild(rightBackbone);
+          basePair.appendChild(leftBase);
+          basePair.appendChild(rightBase);
+          
+          dnaElement.appendChild(basePair);
+        }
+        
+        updateHighlights();
+      }
+      
+      function updateHighlights() {
+        const basePairElements = document.querySelectorAll('.base-pair');
+        
+        basePairElements.forEach((pair) => {
+          const leftBase = pair.querySelector('.base.left');
+          const rightBase = pair.querySelector('.base.right');
+          
+          if (highlightPairs) {
+            // Add labels to the bases
+            if (!pair.querySelector('.label.left')) {
+              const leftLabel = document.createElement('div');
+              leftLabel.className = 'label left';
+              leftLabel.style.left = '40px';
+              leftLabel.style.top = '0px';
+              leftLabel.textContent = leftBase.getAttribute('data-base');
+              pair.appendChild(leftLabel);
+              
+              const rightLabel = document.createElement('div');
+              rightLabel.className = 'label right';
+              rightLabel.style.right = '40px';
+              rightLabel.style.top = '0px';
+              rightLabel.textContent = rightBase.getAttribute('data-base');
+              pair.appendChild(rightLabel);
+              
+              // Add connector line between complementary bases
+              const connector = document.createElement('div');
+              connector.className = 'base-connector';
+              connector.style.position = 'absolute';
+              connector.style.left = '120px';
+              connector.style.right = '120px';
+              connector.style.top = '12px';
+              connector.style.height = '2px';
+              connector.style.backgroundColor = 'rgba(255,255,255,0.8)';
+              connector.style.borderTop = '2px dashed rgba(255,255,255,0.8)';
+              pair.appendChild(connector);
+            }
+          } else {
+            // Remove labels and connectors
+            pair.querySelectorAll('.label, .base-connector').forEach(el => el.remove());
+          }
+        });
+      }
+      
+      // Generate initial DNA
+      generateDNA(basePairs);
+      
+      // Update rotation speed
+      rotationSpeedInput.addEventListener('input', function() {
+        dnaElement.style.animation = animationPaused ? 'none' : rotate ${50 - this.value}s infinite linear;
+      });
+      
+      // Update pairs count
+      pairsCountInput.addEventListener('input', function() {
+        basePairs = parseInt(this.value);
+        generateDNA(basePairs);
+      });
+      
+      // Toggle animation
+      toggleButton.addEventListener('click', function() {
+        animationPaused = !animationPaused;
+        this.textContent = animationPaused ? 'Resume' : 'Pause';
+        dnaElement.style.animation = animationPaused ? 'none' : rotate ${50 - rotationSpeedInput.value}s infinite linear;
+      });
+      
+      // Highlight base pairs
+      highlightButton.addEventListener('click', function() {
+        highlightPairs = !highlightPairs;
+        this.textContent = highlightPairs ? 'Hide Pairs' : 'Highlight Pairs';
+        updateHighlights();
+      });
+
+      // Add pulse effect to bases
+      setInterval(() => {
+        const bases = document.querySelectorAll('.base');
+        bases.forEach(base => {
+          base.style.boxShadow = 0 0 ${15 + Math.random() * 10}px currentColor;
+        });
+      }, 1500);
+    });
+  </script>
+</body>
+</html>
